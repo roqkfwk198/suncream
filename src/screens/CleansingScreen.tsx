@@ -4,58 +4,62 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { Card } from '../components/Card';
 import { ScreenContainer } from '../components/ScreenContainer';
-import { baseCleansingTips, cleansingRules } from '../data/cleansing';
-import { skinTypes } from '../data/skinTypes';
-import { loadSkinTypes } from '../services/storage';
-import { SkinTypeId } from '../types';
-
-const unique = (items: string[]) => Array.from(new Set(items));
+import { loadSkinTypeProfile } from '../services/storage';
+import { SkinTypeProfile } from '../types';
 
 export function CleansingScreen() {
-  const [selectedIds, setSelectedIds] = useState<SkinTypeId[]>([]);
+  const [profile, setProfile] = useState<SkinTypeProfile | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      loadSkinTypes().then(setSelectedIds);
+      loadSkinTypeProfile().then(setProfile);
     }, []),
   );
-
-  const selectedLabels = skinTypes.filter((type) => selectedIds.includes(type.id));
-  const combinedRules = unique(selectedIds.flatMap((id) => cleansingRules[id]));
-  const rulesToShow = combinedRules.length > 0 ? combinedRules : baseCleansingTips;
 
   return (
     <ScreenContainer>
       <View>
         <Text style={styles.title}>선크림 후 세안법</Text>
-        <Text style={styles.subtitle}>진단이 아니라 매일 쓰기 쉬운 생활 관리 팁으로 안내해요.</Text>
+        <Text style={styles.subtitle}>저장된 피부 타입에 맞춰 짧고 실용적인 세안 기준을 안내해요.</Text>
       </View>
 
       <Card style={styles.summaryCard}>
         <Text style={styles.cardTitle}>선택된 피부 타입</Text>
-        <Text style={styles.body}>
-          {selectedLabels.length > 0 ? selectedLabels.map((type) => type.label).join(', ') : '피부 타입을 선택하면 세안 팁이 더 구체화돼요.'}
-        </Text>
+        {profile ? (
+          <>
+            <Text style={styles.typeCode}>{profile.skinTypeCode}</Text>
+            <Text style={styles.body}>{profile.skinTypeDetail.summary}</Text>
+          </>
+        ) : (
+          <Text style={styles.body}>피부 설정 탭에서 피부 타입을 먼저 선택해주세요.</Text>
+        )}
       </Card>
 
       <Card>
         <Text style={styles.cardTitle}>맞춤 세안 루틴</Text>
-        {rulesToShow.map((rule) => (
-          <View key={rule} style={styles.row}>
+        {profile ? (
+          <View style={styles.row}>
             <Text style={styles.bullet}>•</Text>
-            <Text style={styles.rule}>{rule}</Text>
+            <Text style={styles.rule}>{profile.skinTypeDetail.cleansingMethod}</Text>
           </View>
-        ))}
+        ) : (
+          <View style={styles.row}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.rule}>피부 타입 저장 후 맞춤 세안법을 볼 수 있어요.</Text>
+          </View>
+        )}
       </Card>
 
       <Card>
-        <Text style={styles.cardTitle}>기본 루틴</Text>
-        {baseCleansingTips.map((tip) => (
-          <View key={tip} style={styles.row}>
+        <Text style={styles.cardTitle}>관리 포인트</Text>
+        {profile ? (
+          <View style={styles.row}>
             <Text style={styles.bullet}>•</Text>
-            <Text style={styles.rule}>{tip}</Text>
+            <Text style={styles.rule}>{profile.skinTypeDetail.carePoint}</Text>
           </View>
-        ))}
+        ) : (
+          <Text style={styles.body}>피부 설정 탭에서 피부 타입을 먼저 선택해주세요.</Text>
+        )}
       </Card>
     </ScreenContainer>
   );
@@ -86,6 +90,13 @@ const styles = StyleSheet.create({
     color: '#45666E',
     fontSize: 15,
     lineHeight: 22,
+  },
+  typeCode: {
+    color: '#213B45',
+    fontSize: 32,
+    fontWeight: '900',
+    lineHeight: 38,
+    marginBottom: 6,
   },
   row: {
     flexDirection: 'row',

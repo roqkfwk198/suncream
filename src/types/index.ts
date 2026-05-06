@@ -40,6 +40,27 @@ export type SkinType = {
   label: string;
 };
 
+export type SkinMbtiAxisId = 'balance' | 'sensitivity' | 'pigment' | 'elasticity';
+
+export type SkinMbtiOptionCode = 'D' | 'O' | 'S' | 'R' | 'P' | 'N' | 'W' | 'T';
+
+export type SkinMbtiSelections = Record<SkinMbtiAxisId, SkinMbtiOptionCode>;
+
+export type SkinTypeDetail = {
+  code: string;
+  summary: string;
+  sunscreenRecommendation: string;
+  avoidOrCaution: string;
+  carePoint: string;
+  cleansingMethod: string;
+};
+
+export type SkinTypeProfile = {
+  skinTypeCode: string;
+  skinTypeDetail: SkinTypeDetail;
+  selections: SkinMbtiSelections;
+};
+
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
 export type PersistedTimer = {
